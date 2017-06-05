@@ -64,7 +64,7 @@ def alarm_manager(time, delete=False):
 
     starter = '         '
     unit_number = {0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four', 
-           5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten'}
+           5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten', 11: 'eleven', 12: 'twelve'}
 
     teen_number = {11: 'eleven', 12: 'twelve', 13: 'thirteen', 14: 'fourteen', 15: 'fifteen', 
            16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen'}
@@ -73,15 +73,15 @@ def alarm_manager(time, delete=False):
     full_number =  {20: 'twenty', 30: 'thirty', 40: 'fourty', 50: 'fifty'}
 
     if time.minute == 0:
-        alarm_time =  unit_number[time.hour] + '      a   m       tomorrow         ' 
+        alarm_time =  unit_number[time.hour] + '  a   m   tomorrow  ' 
     elif time.minute < 10:
-        alarm_time =  unit_number[time.hour] + '  oh       ' + unit_number[time.minute] + ' a    m        ' + DAY
+        alarm_time =  unit_number[time.hour] + '  oh   ' + unit_number[time.minute] + ' a    m   ' + DAY
     elif time.minute % 10 == 0:
-        alarm_time =  unit_number[time.hour] + '        ' + full_number[time.minute] + ' a   m       ' + DAY
+        alarm_time =  unit_number[time.hour] + '   ' + full_number[time.minute] + ' a   m   ' + DAY
     elif time.minute < 20 and time.minute > 10:
-        alarm_time =  unit_number[time.hour] + '        ' + teen_number[time.minute] + ' a   m       ' + DAY 
+        alarm_time =  unit_number[time.hour] + ' ' + teen_number[time.minute] + '  a   m   ' + DAY 
     else:
-        alarm_time =  unit_number[time.hour] + '        ' + big_number[time.minute / 10] + ' ' + unit_number[time.minute - ((time.minute/10)*10)] + ' ' + 'a m tomorrow'
+        alarm_time =  unit_number[time.hour] + '  ' + big_number[int(time.minute / 10)] + unit_number[time.minute - (int((time.minute/10))*10)] + '  a  m  ' +DAY
     print ("setting alarm constructor time to ", alarm_time)
     text = starter + alarm_time + starter
     tts = gTTS(text= text, lang='en')
