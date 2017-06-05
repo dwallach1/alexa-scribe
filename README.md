@@ -1,5 +1,15 @@
 # Chronos
 
+The intention of Chronos is to be an example application for the underlying system I built. My aim was to build a Python 
+library (alexa-scribe) that automated communcation Amazon Voice Services. Currently, Amazon requires that to trigger 
+any Alexa capabilities the user either needs to initate a voice command (i.e. 'Hey Alexa') or use the mobile application 
+to click and set alarms and such. I believe there is an array of applications that can be used to automate user's lives
+with data that is currently being collected. Chronos' purpose is to showcase just one application that can be used by using
+alexa-scribe.
+
+
+- * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
+
 The goal of this project is to automate your alarm system. Originally, I wanted to use my Amazon Echo; however, due to the
 restrictions that Amazon imposes on third party developers, I built the system using a Raspberry Pi 3. I used code 
 from [here](https://github.com/nicholasjconn/python-alexa-voice-service) as the base of this project. That repo intilaizes the connection between the Raspberry Pi and Amazon Voice Services. From there, I tweaked the main file as well as several others to 
@@ -28,6 +38,13 @@ and see their events for the next day and set their alarm based on their schedul
  ** For the alarm to work, AVS requires that we set up a downstream channel for back and forth communication with AVS. The 
  [inital project](https://github.com/nicholasjconn/python-alexa-voice-service) handled the communication. 
 
+# Running It
+
+- ./ngrok http 5000
+- python3 main.py
+- input the ngrok address into the server screen of the iOS application
+- let Chronos do the rest
+
 # Dependencies
 
  - Python3
@@ -39,5 +56,7 @@ and see their events for the next day and set their alarm based on their schedul
 
 # To Do
 
-Currently, by hacking into the program, I have disabled Alexa's general application to allow for the automation. The main next goal
-is to allow for both functionalities simultaneously. 
+- Currently, by hacking into the program, I have disabled Alexa's general application to allow for the automation. 
+The main next goal is to allow for both functionalities simultaneously. 
+- Extract alexa-scribe from Chronos (seperate the two entities)
+
