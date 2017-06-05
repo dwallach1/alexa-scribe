@@ -1,4 +1,12 @@
+"""
+Based on code written by nicholasjconn.
+See https://github.com/nicholasjconn/python-alexa-voice-service for the original code
 
+- modified AlexaDevice to account for processing states -- used for threading to achieve
+an automated and responsive device
+- changes several functions to handle functionality stemming from automation capabilities
+
+"""
 import helper
 import time
 import threading
@@ -6,11 +14,13 @@ import traceback
 
 import alexa_audio
 import alexa_communication
+from enum import enum
 
-__author__ = "NJC"
-__license__ = "MIT"
-__version__ = "0.2"
 
+class State(Enum):
+    IDLE = 0
+    BUSY = 1
+    
 
 class AlarmManager:
     """ This object manages all alarms and timers sent via the Alerts interface.
@@ -163,6 +173,7 @@ class AlexaDevice:
         self.alarm_manager = AlarmManager()
         self.config = alexa_config
         self.alexa = None
+        self.state = State.IDLE
 
         self.device_stop_event = threading.Event()
         self.device_thread = threading.Thread(target=self.device_thread_function)
@@ -199,7 +210,7 @@ class AlexaDevice:
         raw_audio = self.alexa_audio_instance.get_audio(auto=auto, home=home)
         if raw_audio is None:
             return
-        print ('Printing raw audio')
+
         print (raw_audio)
         # TODO make it so the response can be interrupted by user if desired (maybe start a thread)
         stream_id = self.alexa.start_recognize_event(raw_audio)

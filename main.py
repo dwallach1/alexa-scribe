@@ -8,7 +8,7 @@ from chronos_calendar import get_events
 
 app = Flask(__name__)
 
-
+global DEVICE
 
 def user_input_loop(alexa_device, home=None):
     """ This thread initializes a voice recognition event based on user input. This function uses command line
@@ -19,14 +19,22 @@ def user_input_loop(alexa_device, home=None):
     if home == None:
         while True:
             # Prompt user to press enter to start a recording, or q to quit
-            print ('beginning manual Alexa services')
+            print ('beginning non-automated Alexa services')
             text = input("Press enter anytime to start recording (or 'q' to quit).")
             # If 'q' is pressed
             if text == 'q':
                 # Set stop event and break out of loop
                 alexa_device.close()
                 break
-            alexa_device.user_initiate_audio(home=None)
+            if alexa_device.state = State.IDLE:
+                alexa_device.user_initiate_audio(home=None)
+            else:
+                while alexa_device.state != State.IDLE:
+                    pass
+                alexa_device.state = State.BUSY
+                alexa_device.user_initiate_audio(home=None)
+                alexa_device.state = State.IDLE
+
     else:
         alexa_device.get_context()
         alexa_device.user_initiate_audio(home=home)
@@ -35,15 +43,15 @@ def user_input_loop(alexa_device, home=None):
 
 @app.route("/Run", methods=['POST'])
 def _main():
-    config = helper.read_dict('config.dict')
-##    # Check for authorization, if none, initialize and ask user to go to a website for authorization.
-    if 'refresh_token' not in config:
-        print("Please go to http://localhost:5000")
-        authorization.get_authorization()
-        config = helper.read_dict('config.dict')
+#     config = helper.read_dict('config.dict')
+# ##    # Check for authorization, if none, initialize and ask user to go to a website for authorization.
+#     if 'refresh_token' not in config:
+#         print("Please go to http://localhost:5000")
+#         authorization.get_authorization()
+#         config = helper.read_dict('config.dict')
 
-##    # Create alexa device
-    alexa_devicE = alexa_device.AlexaDevice(config)
+# ##    # Create alexa device
+#     alexa_devicE = alexa_device.AlexaDevice(config)
     
     s = request.args.get("status")        
     if int(s) == 0:
@@ -52,18 +60,41 @@ def _main():
         HOME = True
     elif int(s) == 3:
         print ("iOS synchronization test Successful")
-        return ('', 204) 
+        return ('iOS synchronization test Successful', 200) 
     else:
         print ("Unkown GET Request")
-        return ('', 204) 
-    print (s)
-    print (HOME)
-    user_input_loop(alexa_devicE, home=HOME)
+        return ('', 500) 
+
+    global DEVICE 
+    if DEVICE.state != State.IDLE:
+         while alexa_device.state != State.IDLE:
+            pass
+        DEVICE.state = State.BUSY
+        user_initiate_audio(DEVICE, home=HOME)
+        DEVICE.state = State.IDLE
+
+    # user_input_loop(alexa_devicE, home=HOME)
     print("Done")
     return ('', 204)
 
 @app.route("/")
 def main():
+    # config = helper.read_dict('config.dict')
+    # # Check for authorization, if none, initialize and ask user to go to a website for authorization.
+    # if 'refresh_token' not in config:
+    #     print("Please go to http://localhost:5000")
+    #     authorization.get_authorization()
+    #     config = helper.read_dict('config.dict')
+    # print ('passed original credentials -- configuring device')
+    # # Create alexa device
+    # alexa_devicE = alexa_device.AlexaDevice(config)
+    # user_input_loop(alexa_devicE)
+    # print("Done")
+    return ('', 204)
+
+
+if __name__ == "__main__":
+    # Load configuration file (contains the authorization for the user and device information)
     config = helper.read_dict('config.dict')
     # Check for authorization, if none, initialize and ask user to go to a website for authorization.
     if 'refresh_token' not in config:
@@ -71,15 +102,20 @@ def main():
         authorization.get_authorization()
         config = helper.read_dict('config.dict')
     print ('passed original credentials -- configuring device')
+    
     # Create alexa device
-    alexa_devicE = alexa_device.AlexaDevice(config)
-    user_input_loop(alexa_devicE)
+    global DEVICE
+    DEVICE = alexa_device.AlexaDevice(config)
+
+    if DEVICE.state != State.IDLE:
+         while alexa_device.state != State.IDLE:
+            pass
+    DEVICE.state = State.BUSY
+    DEVICE.user_initiate_audio(DEVICE, home=None)
+    DEVICE.state = State.IDLE
+    user_input_loop(DEVICE)
     print("Done")
-    return ('', 204)
-
-
-if __name__ == "__main__":
-    # Load configuration file (contains the authorization for the user and device information)
+    
     app.run(debug=True)
     #main()
     

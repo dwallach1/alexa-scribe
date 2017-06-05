@@ -1,3 +1,12 @@
+"""
+Based on code written by nicholasjconn.
+See https://github.com/nicholasjconn/python-alexa-voice-service for the original code
+
+- modified get_audio to handle automation
+- changes play_mp3 to not use ffmpeg 
+
+"""
+
 import pyaudio
 import wave
 import subprocess
@@ -41,7 +50,7 @@ class AlexaAudio:
         :return: the raw binary audio string (PCM)
         """
         global count
-        if home != None:
+        if auto:
             if count == 0:
                 print ('FIRST MESSAGE')
                 chronos.generate_files(home)

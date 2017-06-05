@@ -1,4 +1,7 @@
-
+"""
+Based on code written by nicholasjconn.
+See https://github.com/nicholasjconn/python-alexa-voice-service for the original code
+"""
 import json
 import calendar
 import datetime
