@@ -8,7 +8,6 @@ with data that is currently being collected. Chronos' purpose is to showcase jus
 alexa-scribe.
 
 
-- * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
 
 The goal of this project is to automate your alarm system. Originally, I wanted to use my Amazon Echo; however, due to the
 restrictions that Amazon imposes on third party developers, I built the system using a Raspberry Pi 3. I used code 
