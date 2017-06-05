@@ -12,3 +12,5 @@ files/sphinx.log
 validation/*
 *.wav
 *.mp3
+*.pyc
+
