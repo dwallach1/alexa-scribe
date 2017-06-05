@@ -195,7 +195,7 @@ class AlexaDevice:
         # TODO If anything went wrong, and stop event is not set, start new thread automatically
 
     def user_initiate_audio(self, auto=True, home=True):
-       
+           
         raw_audio = self.alexa_audio_instance.get_audio(auto=auto, home=home)
         if raw_audio is None:
             return

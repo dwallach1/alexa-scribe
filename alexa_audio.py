@@ -2,6 +2,7 @@ import pyaudio
 import wave
 import subprocess
 import time
+import speech_recognition
 
 import chronos
 from gtts import gTTS
@@ -40,7 +41,7 @@ class AlexaAudio:
         :return: the raw binary audio string (PCM)
         """
         global count
-        if auto:
+        if home != None:
             if count == 0:
                 print ('FIRST MESSAGE')
                 chronos.generate_files(home)
@@ -62,6 +63,19 @@ class AlexaAudio:
                 raw_audio = data
 
                 count = 0
+        else:
+            r = speech_recognition.Recognizer()
+            with speech_recognition.Microphone() as source:
+                if timeout is None:
+                    print ('you can start speaking now')
+                    audio = r.listen()
+                else:
+                    try:
+                        audio = r.listen(source, timeout=timeout)
+                    except speech_recognition.WaitTimeoutError:
+                        return None
+            raw_audio = audio.get_raw_data()
+            return raw_audio
 
         return raw_audio
 
@@ -77,13 +91,14 @@ class AlexaAudio:
         with open("files/response.mp3", 'wb') as f:
             f.write(raw_audio)
 
+        
+        subprocess.call(['amixer', 'sset', 'PCM,0', '90%'])
         # Convert mp3 response to wave (pyaudio doesn't work with MP3 files)
-        #subprocess.call(['ffmpeg/bin/ffmpeg', '-y', '-i', 'files/response.mp3', 'files/response.wav'],
-           #              stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        #subprocess.call(['aplay', 'files/response.mp3'])
+        sound = AudioSegment.from_mp3("files/response.mp3")
+        sound.export("files/response.wav", format="wav")
 
         # Play a wave file directly
-        #self.play_wav('files/response.wav')
+        self.play_wav('files/response.wav')
         
     def play_wav(self, file, timeout=None, stop_event=None, repeat=False):
         """ Play a wave file using PyAudio. The file must be specified as a path.
