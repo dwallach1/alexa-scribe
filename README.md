@@ -1,18 +1,22 @@
-# Chronos
+# Alexa-Scribe
 
-The intention of Chronos is to be an example application for the underlying system I built. My aim was to build a Python 
-library (alexa-scribe) that automated communcation Amazon Voice Services. Currently, Amazon requires that to trigger 
-any Alexa capabilities the user either needs to initate a voice command (i.e. 'Hey Alexa') or use the mobile application 
-to click and set alarms and such. I believe there is an array of applications that can be used to automate user's lives
-with data that is currently being collected. Chronos' purpose is to showcase just one application that can be used by using
-alexa-scribe.
+My aim for this project was to build a Python library that automated communcation Amazon Voice Services. 
+Currently, Amazon requires that to trigger any Alexa capabilities the user either needs to initate a voice command 
+(i.e. 'Hey Alexa') or use the mobile application to click and set alarms and such. I believe there is an array of
+applications that can be used to automate user's liveswith data that is currently being collected. 
+[Chronos'](https://github.com/dwallach1/chronos-ios) purpose is to showcase just one application that
+ can be used by using alexa-scribe.
 
 
 
 The goal of this project is to automate your alarm system. Originally, I wanted to use my Amazon Echo; however, due to the
 restrictions that Amazon imposes on third party developers, I built the system using a Raspberry Pi 3. I used code 
-from [here](https://github.com/nicholasjconn/python-alexa-voice-service) as the base of this project. That repo intilaizes the connection between the Raspberry Pi and Amazon Voice Services. From there, I tweaked the main file as well as several others to 
-account for automation as well as to run as a Flask App. I then added chronos.py and chronos_calendar.py.
+from [here](https://github.com/nicholasjconn/python-alexa-voice-service) as the base of this project. That repo 
+intilaizes the connection between the Raspberry Pi and Amazon Voice Services. From there, I tweaked the main file as 
+well as several others to account for automation as well as to run as a Flask App. I then added chronos.py and 
+chronos_calendar.py.
+
+** I have yet to seperate Chronos and alexa-scribe, so until I do, they are dependent on one another
 
 - Chronos.py handles generating audio files based on the alarm time determined by the system
 - Chronos_calendar.py checks your google calendar for upcoming events
