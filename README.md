@@ -39,10 +39,10 @@ and see their events for the next day and set their alarm based on their schedul
 
 # Running It
 
-- ./ngrok http 5000
-- python3 main.py
-- input the ngrok address into the server screen of the iOS application
-- let Chronos do the rest
+1. ./ngrok http 5000
+2. python3 main.py
+3. input the ngrok address into the server screen of the iOS application
+4. let the [Chronos iOS application](https://github.com/dwallach1/chronos-ios) do the rest
 
 # Dependencies
 
