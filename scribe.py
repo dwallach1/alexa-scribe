@@ -60,78 +60,74 @@ class Scribe:
     	ext = '.wav'
     	sound = AudioSegment.from_mp3(fname + '.mp3')
     	f = fname + ext
-    	sound.export(f, format="wav")	
-
-   	def read_response(self, fname='response.wav'):
-   		"""generates the text from an audio (wav file)
-
-   		returns:
-   			0 for success
-   			-1 for error (not a wav file)
-   		"""
-   		# Alexa uses the MP3 format for all audio responses
-   		if fname[-4:] != '.mp3':
-   			return -1 
-   		
-   		r = speech_recognition.Recognizer()
-   		try:
-	   		resp = r.recognize_google(fname)
-	   		print ('Alexa responsed with %s' % resp)
-	   		self.resp_q.append(resp)
-	 #   	except sr.UnknownValueError:
-  #   		print("Google Speech Recognition could not understand audio")
-  #   		return -1
-		# except sr.RequestError as e:
-  #   		print("Could not request results from Google Speech Recognition service; {0}".format(e))
-  #   		return -1
-  		except:
-  			return -1
-
-   		return 0
+    	sound.export(f, format="wav")
 
 
-   	def check_response(self, words):
-   		"""checks to make sure all the words are present in the response
-   		from Alexa
-   		@PARAM words --  an array of words
+    def read_response(self, fname='response.wav'):
+   	
+        # Alexa uses the MP3 format for all audio responses
+        if fname[-4:] != '.mp3':
+                return -1 
+        
+        r = speech_recognition.Recognizer()
+        try:
+            resp = r.recognize_google(fname)
+            print ('Alexa responsed with %s' % resp)
+            self.resp_q.append(resp)
+ #   	except sr.UnknownValueError:
+#   	    print("Google Speech Recognition could not understand audio")
+#   	    return -1
+        # except sr.RequestError as e:
+#   	    print("Could not request results from Google Speech Recognition service; {0}".format(e))
+#   	    return -1
+        except:
+            return -1
 
-   		returns:
-   			boolean
-   			or -1 if no response in Scribe object
-   		"""
-   		if len(self.resp_q) < 1:
-   			return -1
-   		resp = self.resp_q.pop(0)
-   		r = resp.split()
-   		for w in words:
-   			if not w in r:
-   				return False
-   		return True
+        return 0
 
 
-   	#
-   	#	generate messages 
-   	#
+    def check_response(self, words):
+            """checks to make sure all the words are present in the response
+            from Alexa
+            @PARAM words --  an array of words
+
+            returns:
+                    boolean
+                    or -1 if no response in Scribe object
+            """
+            if len(self.resp_q) < 1:
+                return -1
+            resp = self.resp_q.pop(0)
+            r = resp.split()
+            for w in words:
+                if not w in r:
+                    return False
+            return True
+
+
+    #
+    #	generate messages 
+    #
     def custom_msg(self, msg):
 
-    	self.msg_q.append(msg)
+        self.msg_q.append(msg)
     	# self.generate_audio()
 
-   	def set_alarm(self, time, am=True):
-   		msg = 'set alarm at ' + time + ' A M '
-   		self.msg_q.append(msg)
-   		# self.generate_audio(fname)
+    def set_alarm(self, time, am=True):
+        msg = 'set alarm at ' + time + ' A M '
+        self.msg_q.append(msg)
+        # self.generate_audio(fname)
 
-   	def delete_alarm(self, time,  am=True):
-   		msg = 'delete alarm at ' + time + ' A M '
-   		self.msg_q.append(msg)
-   		# self.generate_audio(fname)
+    def delete_alarm(self, time,  am=True):
+        msg = 'delete alarm at ' + time + ' A M '
+        self.msg_q.append(msg)
+        # self.generate_audio(fname)
 
-   	def get_msg_q(self):
-   		return self.msg_q
+    def get_msg_q(self):
+        return self.msg_q
 
-   	def get_resp_q(self):
-   		return self.resp_q
+    def get_resp_q(self):
+        return self.resp_q
 
     """Some generic commands programs might use that ensure better successs
 

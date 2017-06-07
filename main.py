@@ -18,7 +18,8 @@ def user_input_loop(alexa_device):
     """
     global device 
     while True:
-        if len(device.msg_q) > 0:
+        print ('Looping again --- checking scribe msg queue')
+        if len(device.scribe.msg_q) > 0:
             curr_msg = device.msg_q.pop(0)
             device.user_initiate_audio(msg=curr_msg)
             print ('processed msg from scribe queue')
@@ -51,7 +52,7 @@ def http_requests():
 @app.route("/")
 def main():
     print ("Starting wakeword ... ")
-    user_initiate_audio(device)
+    user_input_loop(device)
     return ('Home Called', 200)
 
 
