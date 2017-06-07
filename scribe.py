@@ -63,18 +63,17 @@ class Scribe:
         # Alexa uses the MP3 format for all audio responses
         # if fname[-4:] != '.mp3':
         #         return -1 
-        
         r = speech_recognition.Recognizer()
         try:
             resp = r.recognize_google(audio)
             print ('Alexa responsed with %s' % resp)
             self.resp_q.append(resp)
- #   	except sr.UnknownValueError:
-#   	    print("Google Speech Recognition could not understand audio")
-#   	    return -1
-        # except sr.RequestError as e:
-#   	    print("Could not request results from Google Speech Recognition service; {0}".format(e))
-#   	    return -1
+   	    except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+            return -1
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            return -1
         except:
             return -1
 
