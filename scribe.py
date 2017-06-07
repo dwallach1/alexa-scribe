@@ -39,11 +39,6 @@ class Scribe:
     		fname on success,
     		None otherwise
     	"""
-    	# set current message 
-##    	if len(self.msg_q) < 1:
-##    		return None
-##    	curr_msg = self.msg_q.pop(0)
-    	
     	# generate MP3
     	ext = '.mp3'
     	blank_noise = '            ' # we use blank noise to ensure our words are heard 
@@ -63,15 +58,15 @@ class Scribe:
     	sound.export(f, format="wav")
 
 
-    def read_response(self, fname='response.wav'):
+    def read_response(self, audio, fname='files/response.wav'):
    	
         # Alexa uses the MP3 format for all audio responses
-        if fname[-4:] != '.mp3':
-                return -1 
+        # if fname[-4:] != '.mp3':
+        #         return -1 
         
         r = speech_recognition.Recognizer()
         try:
-            resp = r.recognize_google(fname)
+            resp = r.recognize_google(audio)
             print ('Alexa responsed with %s' % resp)
             self.resp_q.append(resp)
  #   	except sr.UnknownValueError:

@@ -206,7 +206,7 @@ class AlexaDevice:
             print ('raw audio is none -- no audio to send')
             return
 
-        print (raw_audio)
+        print ('Got audio bytes -- sending them to AVS ...')
         # TODO make it so the response can be interrupted by user if desired (maybe start a thread)
         stream_id = self.alexa.start_recognize_event(raw_audio)
         self.alexa.get_and_process_response(stream_id)
@@ -313,6 +313,7 @@ class AlexaDevice:
             self.alexa.get_and_process_response(stream_id)
             # Play the mp3 file
             self.alexa_audio_instance.play_mp3(audio_response)
+            self.scribe.read_response(audio_response)
             # Send SpeechFinished Event (with token)
             stream_id = self.alexa.send_event_speech_finished(token)
             self.alexa.get_and_process_response(stream_id)

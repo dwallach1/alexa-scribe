@@ -71,43 +71,6 @@ class AlexaAudio:
             raw_audio = audio.get_raw_data()
             return raw_audio
 
-        # if auto:
-        #     if count == 0:
-        #         print ('FIRST MESSAGE')
-        #         chronos.generate_files(home)
-        #         __location__ = os.path.realpath(
-        #         os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        #         path = os.path.join(__location__, 'alexa_wake.wav')
-        #         with open(path, 'rb') as fd:  # open the file    
-        #             data = fd.read()
-        #         raw_audio = data
-        #         count += 1
-        #     else:
-        #         print ('SECOND MESSAGE')
-        #         chronos.generate_files(home)
-        #         __location__ = os.path.realpath(
-        #         os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        #         path = os.path.join(__location__, 'alexa_command.wav')
-        #         with open(path, 'rb') as fd:  # open the file    
-        #             data = fd.read()
-        #         raw_audio = data
-
-        #         count = 0
-        # else:
-        #     r = speech_recognition.Recognizer()
-        #     with speech_recognition.Microphone() as source:
-        #         if timeout is None:
-        #             print ('you can start speaking now')
-        #             audio = r.listen()
-        #         else:
-        #             try:
-        #                 audio = r.listen(source, timeout=timeout)
-        #             except speech_recognition.WaitTimeoutError:
-        #                 return None
-        #     raw_audio = audio.get_raw_data()
-        #     return raw_audio
-
-        # return raw_audio
 
     def play_mp3(self, raw_audio):
         """ Play an MP3 file. Alexa uses the MP3 format for all audio responses. PyAudio does not support this, so
@@ -125,6 +88,7 @@ class AlexaAudio:
         subprocess.call(['amixer', 'sset', 'PCM,0', '90%'])
         # Convert mp3 response to wave (pyaudio doesn't work with MP3 files)
         sound = AudioSegment.from_mp3("files/response.mp3")
+
         sound.export("files/response.wav", format="wav")
 
         # Play a wave file directly
