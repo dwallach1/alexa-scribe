@@ -21,7 +21,7 @@ def user_input_loop():
     while True:
         print ('Looping again --- checking scribe msg queue')
         if len(device.scribe.msg_q) > 0:
-            curr_msg = device.msg_q.pop(0)
+            curr_msg = device.scribe.msg_q.pop(0)
             device.user_initiate_audio(msg=curr_msg)
             print ('processed msg from scribe queue')
         else:
@@ -54,6 +54,7 @@ def http_requests():
 def main():
     print ("Starting wakeword thread ... ")
     t = threading.Thread(target=user_input_loop)
+    t.start()
     # user_input_loop(device)
     return ('Home Called', 200)
 

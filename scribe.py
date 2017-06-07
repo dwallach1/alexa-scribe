@@ -40,23 +40,23 @@ class Scribe:
     		None otherwise
     	"""
     	# set current message 
-    	if len(self.messages) < 1:
-    		return None
-    	curr_msg = self.messages.pop(0)
+##    	if len(self.msg_q) < 1:
+##    		return None
+##    	curr_msg = self.msg_q.pop(0)
     	
     	# generate MP3
     	ext = '.mp3'
     	blank_noise = '            ' # we use blank noise to ensure our words are heard 
-    	text = blank_noise + curr_msg + blank_noises
+    	text = blank_noise + msg + blank_noise
     	tts = gTTS(text= text, lang='en')
     	f = fname + ext
     	tts.save(f)
 
     	# convert MP3 to wav b/c AVS needs wav file
-    	convert_to_wav(fname)
+    	self.convert_to_wav(fname)
     	return fname + '.wav'
 
-    def convert_to_wav(fname='command'):
+    def convert_to_wav(self, fname):
     	ext = '.wav'
     	sound = AudioSegment.from_mp3(fname + '.mp3')
     	f = fname + ext
