@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify
+import threading
 import time 
+from flask import Flask, request, jsonify
 
 import helper
 import authorization
@@ -10,7 +11,7 @@ app = Flask(__name__)
 
 global device
 
-def user_input_loop(alexa_device):
+def user_input_loop():
     """ This thread initializes a voice recognition event based on user input. This function uses command line
         input for interacting with the user. The user can start a recording, or quit if desired.
 
@@ -51,8 +52,9 @@ def http_requests():
 
 @app.route("/")
 def main():
-    print ("Starting wakeword ... ")
-    user_input_loop(device)
+    print ("Starting wakeword thread ... ")
+    t = threading.Thread(target=user_input_loop)
+    # user_input_loop(device)
     return ('Home Called', 200)
 
 
@@ -73,6 +75,7 @@ if __name__ == "__main__":
 
     # Start Alexa 
     # start_wake_word()
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run()
     print("Done -- Turning off Alexa")
     
