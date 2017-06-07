@@ -68,10 +68,10 @@ class Scribe:
             resp = r.recognize_google(audio)
             print ('Alexa responsed with %s' % resp)
             self.resp_q.append(resp)
-   	    except sr.UnknownValueError:
+        except r.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
             return -1
-        except sr.RequestError as e:
+        except r.RequestError as e:
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
             return -1
         except:
