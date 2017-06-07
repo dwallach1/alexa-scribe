@@ -6,7 +6,7 @@ See https://github.com/nicholasjconn/python-alexa-voice-service for the original
 - changes play_mp3 to not use ffmpeg 
 
 """
-
+import os
 import pyaudio
 import wave
 import subprocess
@@ -17,10 +17,7 @@ import chronos
 from gtts import gTTS
 from pydub import AudioSegment
 from chronos_calendar import get_events
-import os
 
-global count
-count = 0
 
 class AlexaAudio:
     """ This object handles all audio playback and recording required by the Alexa enabled device. Audio playback
@@ -39,7 +36,7 @@ class AlexaAudio:
         # Terminate the pyaudio instance
         self.pyaudio_instance.terminate()
 
-    def get_audio(self, timeout=None, auto=True, home=True):
+    def get_audio(self, timeout=None, scribe=None, msg=None):
         """ Get audio from the microphone. The SpeechRecognition package is used to automatically stop listening
             when the user stops speaking. A timeout can also be specified. If the timeout is reached, the function
             returns None.
@@ -49,30 +46,18 @@ class AlexaAudio:
         :param timeout: timeout in seconds, when to give up if the user did not speak.
         :return: the raw binary audio string (PCM)
         """
-        global count
-        if auto:
-            if count == 0:
-                print ('FIRST MESSAGE')
-                chronos.generate_files(home)
-                __location__ = os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(__file__)))
-                path = os.path.join(__location__, 'alexa_wake.wav')
-                with open(path, 'rb') as fd:  # open the file    
-                    data = fd.read()
-                raw_audio = data
-                count += 1
-            else:
-                print ('SECOND MESSAGE')
-                chronos.generate_files(home)
-                __location__ = os.path.realpath(
-                os.path.join(os.getcwd(), os.path.dirname(__file__)))
-                path = os.path.join(__location__, 'alexa_command.wav')
-                with open(path, 'rb') as fd:  # open the file    
-                    data = fd.read()
-                raw_audio = data
-
-                count = 0
+        if not (msg is None):
+            # Alexa triggered from scribe -- use scribe for audio input
+            fname = scribe.generate_audio(msg)
+            __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+            path = os.path.join(__location__, fname)
+            with open(path, 'rb') as fd:  # open the file    
+                data = fd.read()
+            raw_audio = data
+            return raw_audio
         else:
+            # Alexa began from Wake Word -- use Mic for audio input
             r = speech_recognition.Recognizer()
             with speech_recognition.Microphone() as source:
                 if timeout is None:
@@ -86,7 +71,43 @@ class AlexaAudio:
             raw_audio = audio.get_raw_data()
             return raw_audio
 
-        return raw_audio
+        # if auto:
+        #     if count == 0:
+        #         print ('FIRST MESSAGE')
+        #         chronos.generate_files(home)
+        #         __location__ = os.path.realpath(
+        #         os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        #         path = os.path.join(__location__, 'alexa_wake.wav')
+        #         with open(path, 'rb') as fd:  # open the file    
+        #             data = fd.read()
+        #         raw_audio = data
+        #         count += 1
+        #     else:
+        #         print ('SECOND MESSAGE')
+        #         chronos.generate_files(home)
+        #         __location__ = os.path.realpath(
+        #         os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        #         path = os.path.join(__location__, 'alexa_command.wav')
+        #         with open(path, 'rb') as fd:  # open the file    
+        #             data = fd.read()
+        #         raw_audio = data
+
+        #         count = 0
+        # else:
+        #     r = speech_recognition.Recognizer()
+        #     with speech_recognition.Microphone() as source:
+        #         if timeout is None:
+        #             print ('you can start speaking now')
+        #             audio = r.listen()
+        #         else:
+        #             try:
+        #                 audio = r.listen(source, timeout=timeout)
+        #             except speech_recognition.WaitTimeoutError:
+        #                 return None
+        #     raw_audio = audio.get_raw_data()
+        #     return raw_audio
+
+        # return raw_audio
 
     def play_mp3(self, raw_audio):
         """ Play an MP3 file. Alexa uses the MP3 format for all audio responses. PyAudio does not support this, so

@@ -14,13 +14,7 @@ import traceback
 
 import alexa_audio
 import alexa_communication
-from enum import enum
-
-
-class State(Enum):
-    IDLE = 0
-    BUSY = 1
-    
+import scribe
 
 class AlarmManager:
     """ This object manages all alarms and timers sent via the Alerts interface.
@@ -173,7 +167,7 @@ class AlexaDevice:
         self.alarm_manager = AlarmManager()
         self.config = alexa_config
         self.alexa = None
-        self.state = State.IDLE
+        self.scribe = scribe.Scribe()
 
         self.device_stop_event = threading.Event()
         self.device_thread = threading.Thread(target=self.device_thread_function)
@@ -205,10 +199,11 @@ class AlexaDevice:
         print("Closing Thread")
         # TODO If anything went wrong, and stop event is not set, start new thread automatically
 
-    def user_initiate_audio(self, auto=True, home=True):
-           
-        raw_audio = self.alexa_audio_instance.get_audio(auto=auto, home=home)
-        if raw_audio is None:
+    def user_initiate_audio(self, msg=None):
+        scribe = self.scribe
+        raw_audio = self.alexa_audio_instance.get_audio(msg=msg, scribe=scribe)
+        if raw_audio is None or raw_audio == None:
+            print ('raw audio is none -- no audio to send')
             return
 
         print (raw_audio)

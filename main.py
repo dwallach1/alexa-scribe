@@ -1,96 +1,58 @@
+from flask import Flask, request, jsonify
+import time 
 
 import helper
 import authorization
 import alexa_device
-
-from flask import Flask, request, jsonify
 from chronos_calendar import get_events
 
 app = Flask(__name__)
 
-global DEVICE
+global device
 
-def user_input_loop(alexa_device, home=None):
+def user_input_loop(alexa_device):
     """ This thread initializes a voice recognition event based on user input. This function uses command line
         input for interacting with the user. The user can start a recording, or quit if desired.
 
         This is currently the "main" thread for the device.
     """
-    if home == None:
-        while True:
-            # Prompt user to press enter to start a recording, or q to quit
-            print ('beginning non-automated Alexa services')
-            text = input("Press enter anytime to start recording (or 'q' to quit).")
-            # If 'q' is pressed
-            if text == 'q':
-                # Set stop event and break out of loop
-                alexa_device.close()
-                break
-            if alexa_device.state = State.IDLE:
-                alexa_device.user_initiate_audio(home=None)
-            else:
-                while alexa_device.state != State.IDLE:
-                    pass
-                alexa_device.state = State.BUSY
-                alexa_device.user_initiate_audio(home=None)
-                alexa_device.state = State.IDLE
+    global device 
+    while True:
+        if len(device.msg_q) > 0:
+            curr_msg = device.msg_q.pop(0)
+            device.user_initiate_audio(msg=curr_msg)
+            print ('processed msg from scribe queue')
+        else:
+            # wake word --
+            print (' would be initated from wake word once working')
+            time.sleep(5)
 
-    else:
-        alexa_device.get_context()
-        alexa_device.user_initiate_audio(home=home)
-        return ('', 204) 
     return ('',204)
 
 @app.route("/Run", methods=['POST'])
-def _main():
-#     config = helper.read_dict('config.dict')
-# ##    # Check for authorization, if none, initialize and ask user to go to a website for authorization.
-#     if 'refresh_token' not in config:
-#         print("Please go to http://localhost:5000")
-#         authorization.get_authorization()
-#         config = helper.read_dict('config.dict')
+def http_requests():    
+    # s = request.args.get("status")        
+    # if int(s) == 0:
+    #     HOME = False
+    # elif int(s) == 1:
+    #     HOME = True
+    # elif int(s) == 3:
+    #     print ("iOS synchronization test Successful")
+    #     return ('iOS synchronization test Successful', 200) 
+    # else:
+    #     print ("Unkown POST Request")
+    #     return ('', 500) 
 
-# ##    # Create alexa device
-#     alexa_devicE = alexa_device.AlexaDevice(config)
-    
-    s = request.args.get("status")        
-    if int(s) == 0:
-        HOME = False
-    elif int(s) == 1:
-        HOME = True
-    elif int(s) == 3:
-        print ("iOS synchronization test Successful")
-        return ('iOS synchronization test Successful', 200) 
-    else:
-        print ("Unkown GET Request")
-        return ('', 500) 
-
-    global DEVICE 
-    if DEVICE.state != State.IDLE:
-         while alexa_device.state != State.IDLE:
-            pass
-        DEVICE.state = State.BUSY
-        user_initiate_audio(DEVICE, home=HOME)
-        DEVICE.state = State.IDLE
-
-    # user_input_loop(alexa_devicE, home=HOME)
-    print("Done")
-    return ('', 204)
+    global device 
+    device.scribe.msg_q.append('Tell me a joke')
+    print("Added msg to scribe queue")
+    return ('Successfully added message to scribe queue', 200)
 
 @app.route("/")
 def main():
-    # config = helper.read_dict('config.dict')
-    # # Check for authorization, if none, initialize and ask user to go to a website for authorization.
-    # if 'refresh_token' not in config:
-    #     print("Please go to http://localhost:5000")
-    #     authorization.get_authorization()
-    #     config = helper.read_dict('config.dict')
-    # print ('passed original credentials -- configuring device')
-    # # Create alexa device
-    # alexa_devicE = alexa_device.AlexaDevice(config)
-    # user_input_loop(alexa_devicE)
-    # print("Done")
-    return ('', 204)
+    print ("Starting wakeword ... ")
+    user_initiate_audio(device)
+    return ('Home Called', 200)
 
 
 if __name__ == "__main__":
@@ -101,21 +63,15 @@ if __name__ == "__main__":
         print("Please go to http://localhost:5000")
         authorization.get_authorization()
         config = helper.read_dict('config.dict')
+   
     print ('passed original credentials -- configuring device')
     
-    # Create alexa device
-    global DEVICE
-    DEVICE = alexa_device.AlexaDevice(config)
+    # Set device to alexa device from configuration file
+    global device
+    device = alexa_device.AlexaDevice(config)
 
-    if DEVICE.state != State.IDLE:
-         while alexa_device.state != State.IDLE:
-            pass
-    DEVICE.state = State.BUSY
-    DEVICE.user_initiate_audio(DEVICE, home=None)
-    DEVICE.state = State.IDLE
-    user_input_loop(DEVICE)
-    print("Done")
-    
+    # Start Alexa 
+    # start_wake_word()
     app.run(debug=True)
-    #main()
+    print("Done -- Turning off Alexa")
     
