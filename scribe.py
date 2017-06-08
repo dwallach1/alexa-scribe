@@ -30,7 +30,7 @@ class Scribe:
         self.msg_q = []
         self.resp_q = []
 
-    def generate_audio(self, msg, fname='command'):
+    def generate_audio(self, msg, fname='files/command'):
     	"""takes in a file path and creates a wav file to be sent to AVS
 
     	@PARAM fname -- a filename to create (or replace) the new wav file
@@ -99,13 +99,21 @@ class Scribe:
             return True
 
 
+    def get_msg_q(self):
+        return self.msg_q
+
+    def get_resp_q(self):
+        return self.resp_q
+
+    """Some generic commands programs might use that ensure better successs
+
     #
-    #	generate messages 
+    #   generate messages 
     #
     def custom_msg(self, msg):
 
         self.msg_q.append(msg)
-    	# self.generate_audio()
+        # self.generate_audio()
 
     def set_alarm(self, time, am=True):
         msg = 'set alarm at ' + time + ' A M '
@@ -117,13 +125,6 @@ class Scribe:
         self.msg_q.append(msg)
         # self.generate_audio(fname)
 
-    def get_msg_q(self):
-        return self.msg_q
-
-    def get_resp_q(self):
-        return self.resp_q
-
-    """Some generic commands programs might use that ensure better successs
 
     def play_spotify():
 
