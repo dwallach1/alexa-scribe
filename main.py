@@ -34,6 +34,7 @@ def user_input_loop():
             # please try again in 30 seconds 
             subprocess.call(['amixer', 'sset', 'PCM,0', '90%'])
             sound = AudioSegment.from_mp3("files/busy.mp3")
+            return 
 
         if len(device.scribe.msg_q) > 0 and state == State.idle:
             state = State.busy
@@ -45,11 +46,18 @@ def user_input_loop():
             # wake word --
             print (' would be initated from wake word once working')
             time.sleep(5)
+    # we are done -- exit function, return nothing
 
-    return ('',204)
 
 @app.route("/Run", methods=['POST'])
-def http_requests():   
+def http_requests():  
+    """
+    this is the function that exposes Scribe to called from 3rd party applications -- allowing
+    for a programmable interfece.
+
+    The POST request will come with a json payload containing the message to be sent (a string).
+    if no payload is sent, the function will do nothing.
+    """ 
     global device 
     device.scribe.msg_q.append('Tell me a joke')
     print("Added msg to scribe queue")
