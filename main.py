@@ -1,5 +1,6 @@
 import threading
 import time 
+import logging
 from enum import Enum 
 from flask import Flask, request, jsonify
 
@@ -11,16 +12,32 @@ import snowboydecoder
 
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-9s) %(message)s',)
+lock = threading.Lock()
 
 def State(Enum):
     idle = 0
     busy = 1
 
+# class Assistant(object):
+#     def __init__(self):
+#         self.device = None 
+#         self.queue = []
+
+#     def whenChanged(self):
+#         next = self.queue.dequeue()
+#         next.function()
+
+#     def __setattr__(self, key, value):
+#         self.key = value
+#         self.whenChanged()
+
+
 global device
 global state
 state = State.idle
 
-def user_input_loop():
+def user_input_loop(hotword=False):
     """ This thread initializes a voice recognition event based on user input. This function uses command line
         input for interacting with the user. The user can start a recording, or quit if desired.
 
@@ -28,24 +45,31 @@ def user_input_loop():
     """
     global device 
     global state
-    while True:
-        if state == State.busy:
-            # if the thread is busy say that we are processing an external request,
-            # please try again in 30 seconds 
-            subprocess.call(['amixer', 'sset', 'PCM,0', '90%'])
-            sound = AudioSegment.from_mp3("files/busy.mp3")
-            return 
-
-        if len(device.scribe.msg_q) > 0 and state == State.idle:
+    # while True:
+    # if we are processing a Scirbe request and the wakeword is called,
+    # please try again in 30 seconds 
+    if state == State.busy and hotword:
+        subprocess.call(['amixer', 'sset', 'PCM,0', '90%'])
+        sound = AudioSegment.from_mp3("files/busy.mp3")
+        return 
+    # called from a Scribe request
+    if len(device.scribe.msg_q) > 0 and hotword == False:
+        if state == State.idle:
+            logging.debug('Waiting for a lock')
+            lock.acquire()
             state = State.busy
             curr_msg = device.scribe.msg_q.pop(0)
             device.user_initiate_audio(msg=curr_msg)
-            print ('processed msg from scribe queue')
+            logging.debug('Processed message from Scribe')
             state = State.idle
-        else:
-            # wake word --
-            print (' would be initated from wake word once working')
-            time.sleep(5)
+            logging.debug('Released a lock')
+            lock.release()
+
+    else:
+        # called from wake word detection
+        print (' would be initated from wake word once working')
+        device.user_initiate_audio()
+        time.sleep(5)
     # we are done -- exit function, return nothing
 
 
@@ -61,11 +85,15 @@ def http_requests():
     global device 
     device.scribe.msg_q.append('Tell me a joke')
     print("Added msg to scribe queue")
-
+    user_input_loop()
     return ('Successfully added message to scribe queue', 200)
 
 def detected_callback():
-    user_input_loop()
+    t = threading.Thread(target=user_input_loop, kwargs={'hotword': True})
+    t.start()
+    t.join()
+    # user_input_loop()
+
     print "hotword detected"
 
 @app.route("/")
