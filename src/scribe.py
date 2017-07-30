@@ -10,8 +10,6 @@ Make web request to run alexa -- if valid scribe type then
 	- tell program to send wav file to AVS and play response 
 	
 """
-
-# Audio Manipulation
 import wave 
 from gtts import gTTS
 import speech_recognition

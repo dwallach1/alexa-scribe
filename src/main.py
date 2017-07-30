@@ -66,8 +66,10 @@ TODO:
 
 # initalize services 
 app = Flask(__name__)
-logging.basicConfig(filename='files/run.log', filemode='w', level=logging.DEBUG, 
+logging.basicConfig(filename='../files/run.log', filemode='w', level=logging.DEBUG, 
                                         format='(%(threadName)-9s) %(message)s',)
+logger = logging.getLogger(__name__)
+
 lock = threading.Lock()
 
 def State(Enum):
@@ -102,30 +104,30 @@ def start_services(hotword=False):
     global device 
     global state
 
-    # if we are processing a Scirbe request and the wakeword is called,
-    # please try again in 30 seconds 
+    # if we are processing a Scirbe request and the wakeword is called, please try again in 30 seconds 
     if state == State.busy and hotword:
         subprocess.call(['amixer', 'sset', 'PCM,0', '90%'])
-        sound = AudioSegment.from_mp3("files/busy.mp3")
+        sound = AudioSegment.from_mp3('../files/busy.mp3')
         return 
+    
     # called from a Scribe request
     if len(device.scribe.msg_q) > 0 and hotword == False:
         if state == State.idle:
-            logging.debug('Waiting for a lock')
+            logger.debug('Waiting for a lock')
             lock.acquire()
             state = State.busy
             curr_msg = device.scribe.msg_q.pop(0)
             device.user_initiate_audio(msg=curr_msg)
-            logging.debug('Processed message from Scribe')
+            logger.debug('Processed message from Scribe')
             state = State.idle
-            logging.debug('Released a lock')
+            logger.debug('Released a lock')
             lock.release()
 
     else:
         # called from wake word detection
-        logging.info('Start litsening for user input to mic')
+        logger.debug('Start litsening for user input to mic')
         device.user_initiate_audio()
-        logging.info('Processed user request -- Done')
+        logger.debug('Processed user request -- Done')
     
     # we are done -- exit function, return nothing
 
@@ -139,7 +141,7 @@ def scribe_handler():
     if no payload is sent, the function will do nothing.
     """ 
     if disable:
-        logging.warning('Scribe is turned off but request made')
+        logger.warning('Scribe is turned off but request made')
         return 
     global device 
     # msg = json.get_payload['command']
@@ -149,7 +151,7 @@ def scribe_handler():
     # device.scribe.msg_q.append(msg)
     device.scribe.msg_q.append('Tell me a joke')
   
-    logging.info('Added message to Scribe queue')
+    logger.info('Added message to Scribe queue')
     t = threading.Thread(target=_scribe_handler, name='scribe handler thread')
     t.start()
     
@@ -159,22 +161,21 @@ def _scribe_handler():
     while device.state == State.busy:
         pass
     start_services()
-    logging.info('processed scribe request -- DONE')
+    logger.info('processed scribe request -- DONE')
     for resp in device.scribe.resp_q:
-        logging.debug('AVS response: status: %s, type: %s, namespace: %s, name: %s' % (device.scribe.response.status,
+        logger.debug('AVS response: status: %s, type: %s, namespace: %s, name: %s' % (device.scribe.response.status,
                                                                                        device.scribe.response._type,
                                                                                        device.scribe.response.namespace,
                                                                                        device.scribe.response.name))
 
 
 def detected_callback():
-    t = threading.Thread(target=start_services, kwargs={'hotword': True}, name='hotword thread')
+    t = threading.Thread(target=start_services, kwargs={'hotword': True}, name='hotword_thread')
     t.start()
     # begin the thread, wait for it to return
     # t.join()
     # start_services()
-
-    print "hotword detected"
+    print ('hotword detected')
 
 @app.route("/")
 def main():
@@ -199,7 +200,7 @@ if __name__ == "__main__":
         authorization.get_authorization()
         config = helper.read_dict('config.dict')
    
-    logging.debug('passed original credentials -- configuring device')
+    logger.debug('passed original credentials -- configuring device')
     
     # Set device to alexa device from configuration file
     global device
@@ -209,12 +210,12 @@ if __name__ == "__main__":
     # t.start()
 
     # Start wake word detection ("Jarvis")
-    detector = snowboydecoder.HotwordDetector("files/Jarives.pmdl", sensitivity=0.5, auto_gain=1)
+    detector = snowboydecoder.HotwordDetector("../files/Jarives.pmdl", sensitivity=0.5, auto_gain=1)
     detector.start(detected_callback)
 
     logger.info('initalized device and hotword, running app now on localhost:5000')
 
     # app.run(debug=True)
     app.run()
-    logging.debug("Done -- Turning off Alexa")
+    logger.debug('Done -- Turning off Alexa')
     
