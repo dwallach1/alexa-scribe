@@ -44,7 +44,7 @@ import helper
 import authorization
 import alexa_device
 
-import snowboydecoder
+#import snowboydecoder
 
 """
 WHAT TO TEST :
@@ -72,26 +72,13 @@ logger = logging.getLogger(__name__)
 
 lock = threading.Lock()
 
-def State(Enum):
-    idle = 0
-    busy = 1
-
-# class Boss(object):
-#     def __init__(self):
-#         self.device = None 
-#         self.queue = []
-
-#     def whenChanged(self):
-#         next = self.queue.dequeue()
-#         next.function()
-
-#     def __setattr__(self, key, value):
-#         self.key = value
-#         self.whenChanged()
+class State:
+    idle, waiting, busy = range(3)
 
 
-# global device
-# global state
+global device
+global state
+global disable
 state = State.idle
 disable = False
 
@@ -133,7 +120,7 @@ def start_services(hotword=False):
 
 @app.route("/Run", methods=['POST'])
 def scribe_handler():
-      """
+    """
     this is the function that exposes Scribe to called from 3rd party applications -- allowing
     for a programmable interfece.
 
@@ -144,12 +131,12 @@ def scribe_handler():
         logger.warning('Scribe is turned off but request made')
         return 
     global device 
-    # msg = json.get_payload['command']
-    # if not isinstance(msg, str):
-    #     logging.warning('Scribe message not of string format -- cannot parse it')
-    #     return 
-    # device.scribe.msg_q.append(msg)
-    device.scribe.msg_q.append('Tell me a joke')
+    msg = json.get_payload['command']
+    if not isinstance(msg, str):
+         logging.warning('Scribe message not of string format -- cannot parse it')
+         return 
+    device.scribe.msg_q.append(msg)
+    #device.scribe.msg_q.append('Tell me a joke')
   
     logger.info('Added message to Scribe queue')
     t = threading.Thread(target=_scribe_handler, name='scribe handler thread')
@@ -167,7 +154,6 @@ def _scribe_handler():
                                                                                        device.scribe.response._type,
                                                                                        device.scribe.response.namespace,
                                                                                        device.scribe.response.name))
-
 
 def detected_callback():
     t = threading.Thread(target=start_services, kwargs={'hotword': True}, name='hotword_thread')
@@ -191,7 +177,7 @@ if __name__ == "__main__":
     if args.disable:
         global disable
         disable = True
-        print "Scribe turned off"
+        print ('Scribe turned off')
     
     # check configuration and detect if user needs to authorize device usage
     config = helper.read_dict('config.dict')
@@ -210,8 +196,8 @@ if __name__ == "__main__":
     # t.start()
 
     # Start wake word detection ("Jarvis")
-    detector = snowboydecoder.HotwordDetector("../files/Jarives.pmdl", sensitivity=0.5, auto_gain=1)
-    detector.start(detected_callback)
+   # detector = snowboydecoder.HotwordDetector("../files/Jarives.pmdl", sensitivity=0.5, auto_gain=1)
+   # detector.start(detected_callback)
 
     logger.info('initalized device and hotword, running app now on localhost:5000')
 
