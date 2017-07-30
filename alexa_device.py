@@ -7,9 +7,10 @@ an automated and responsive device
 - changes several functions to handle functionality stemming from automation capabilities
 
 """
-import helper
 import time
 import threading
+import logging
+import helper
 import traceback
 
 import alexa_audio
@@ -203,13 +204,14 @@ class AlexaDevice:
         scribe = self.scribe
         raw_audio = self.alexa_audio_instance.get_audio(msg=msg, scribe=scribe)
         if raw_audio is None or raw_audio == None:
-            print ('raw audio is none -- no audio to send')
+            logger.warning('raw audio is none -- no audio to send')
             return
 
-        print ('Got audio bytes -- sending them to AVS ...')
+        logger.info('Got audio bytes -- sending them to AVS ...')
         # TODO make it so the response can be interrupted by user if desired (maybe start a thread)
         stream_id = self.alexa.start_recognize_event(raw_audio)
         self.alexa.get_and_process_response(stream_id)
+
 
     def get_context(self):
         """ Returns the current context of the AlexaDevice.
@@ -267,11 +269,20 @@ class AlexaDevice:
         else:
             attachment = None
 
+
         # print("%d messages received" % len(message['content']))
         # Loop through all content received
         #print (message)
         for content in message['content']:
             header = content['directive']['header']
+
+            # Add response to scribe response queue
+            resp = scribe.Response()
+            resp.content = content
+            resp.namespace = header['namespace']
+            resp.name = header['name']
+            self.scribe.resp_q.append(resp)
+
 
             # Get the namespace from the header and call the correct process directive function
             namespace = header['namespace']

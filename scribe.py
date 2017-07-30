@@ -17,18 +17,21 @@ from gtts import gTTS
 import speech_recognition
 from pydub import AudioSegment
 
+class Response:
+    def __init__(self):
+        content = None
+        name = None
+        namespace = None 
 
-class Scribe:
+
+class Scribe(object):
     def __init__(self):
         """ AlexaAudio initialization function.
 
         @PARAM scribe -- the type of message 
         """
-        # Initialize scribe type
-        # this lets the system know how to strucure audio messages
-        # TODO: before initalizing Scribe -- ensure that it is a valid type
         self.msg_q = []
-        self.resp_q = []
+        self.resp_q = [] # array (queue) of Response Objects
 
     def generate_audio(self, msg, fname='files/command'):
     	"""takes in a file path and creates a wav file to be sent to AVS
