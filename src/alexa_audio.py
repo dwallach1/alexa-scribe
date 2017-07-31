@@ -59,7 +59,7 @@ class AlexaAudio:
         else:
             # Alexa began from Wake Word -- use Mic for audio input
             r = speech_recognition.Recognizer()
-            with speech_recognition.Microphone() as source:
+            with speech_recognition.Microphone(device_index=1) as source:
                 if timeout is None:
                     print ('you can start speaking now')
                     audio = r.listen()

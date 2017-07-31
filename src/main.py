@@ -33,36 +33,18 @@ begin new thread for each request -->
     2. if it is a Scribe request and the device is busy, spin unitl device is free and then process request
 This is because I do not envision this collision happening often, can handle this better at a later time.
 """
+import sys
+import signal
 import threading
 import time 
 import logging
-import argparse
-from enum import Enum 
 from flask import Flask, request, jsonify
-
 import helper
 import authorization
 import alexa_device
+import snowboydecoder
 
-#import snowboydecoder
 
-"""
-WHAT TO TEST :
-
-Need to make sure second thread blocks while processing request --
--- if hotword detected but processing thread, then say message
-if opposite then wait to run 
-
--- check how many threads, main thread and 2 threads ? or 1 main thread and one checking thread
-
-TODO:
-- add logging
-- ensure no threading errors
-- add locking b/c of ^
-- what happens when no join() call is made to threads -- make sure properly cleaning up
-- initalizing global variables?!
-- can two threads have the same name?
-"""
 
 # initalize services 
 app = Flask(__name__)
@@ -75,10 +57,7 @@ lock = threading.Lock()
 class State:
     idle, waiting, busy = range(3)
 
-
-global device
-global state
-global disable
+interrupted = False
 state = State.idle
 disable = False
 
@@ -127,6 +106,7 @@ def scribe_handler():
     The POST request will come with a json payload containing the message to be sent (a string).
     if no payload is sent, the function will do nothing.
     """ 
+    global disable
     if disable:
         logger.warning('Scribe is turned off but request made')
         return 
@@ -155,7 +135,7 @@ def _scribe_handler():
                                                                                        device.scribe.response.namespace,
                                                                                        device.scribe.response.name))
 
-def detected_callback():
+def listen():
     t = threading.Thread(target=start_services, kwargs={'hotword': True}, name='hotword_thread')
     t.start()
     # begin the thread, wait for it to return
@@ -163,21 +143,21 @@ def detected_callback():
     # start_services()
     print ('hotword detected')
 
+def interrupt_callback():
+    global interrupted
+    return interrupted
+
+def signal_handler(signal, frame):
+    global interrupted
+    interrupted = True
+
+
 @app.route("/")
 def main():
     return ('Home Called', 200)
 
 
 if __name__ == "__main__":
-    # allow for Scribe to be turned off
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--disable", help="disable Scribe requests",
-                        action="store_true")
-    args = parser.parse_args()
-    if args.disable:
-        global disable
-        disable = True
-        print ('Scribe turned off')
     
     # check configuration and detect if user needs to authorize device usage
     config = helper.read_dict('config.dict')
@@ -194,14 +174,19 @@ if __name__ == "__main__":
 
     # t = threading.Thread(target=start_services)
     # t.start()
+    
+    signal.signal(signal.SIGINT, signal_handler)
 
     # Start wake word detection ("Jarvis")
-   # detector = snowboydecoder.HotwordDetector("../files/Jarives.pmdl", sensitivity=0.5, auto_gain=1)
-   # detector.start(detected_callback)
+    detector = snowboydecoder.HotwordDetector("Jarvis.pmdl", sensitivity=0.9)
+    print ('Jarvis is listening... Press ctrl+c to exit')
+    detector.start(detected_callback=listen, 
+                  interrupt_check=interrupt_callback,
+                  sleep_time=0.03)
 
     logger.info('initalized device and hotword, running app now on localhost:5000')
-
+    detector.terminate()
     # app.run(debug=True)
-    app.run()
+    #app.run()
     logger.debug('Done -- Turning off Alexa')
     

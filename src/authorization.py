@@ -12,8 +12,10 @@ from cherrypy.process import servers
 import requests
 import json
 import threading
-import urllib.parse
-
+try:
+    import urllib.parse
+except ImportError:
+    from urlparse import urlparse
 
 import helper
 
@@ -43,7 +45,8 @@ class Start(object):
         raise cherrypy.HTTPRedirect(p.url)
 
     def code(self, var=None, **params):
-        code = urllib.parse.quote(cherrypy.request.params['code'])
+        #code = urllib.parse.quote(cherrypy.request.params['code'])
+        code = urlparse(quote(cherrypy.request.params['code']))
         callback = cherrypy.url()
         payload = {
             "client_id": self.config['Client_ID'],
