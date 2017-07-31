@@ -178,7 +178,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
 
     # Start wake word detection ("Jarvis")
-    detector = snowboydecoder.HotwordDetector("Jarvis.pmdl", sensitivity=0.9)
+    detector = snowboydecoder.HotwordDetector("Jarvis.pmdl", sensitivity=0.6)
     print ('Jarvis is listening... Press ctrl+c to exit')
     detector.start(detected_callback=listen, 
                   interrupt_check=interrupt_callback,
